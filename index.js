@@ -1,22 +1,38 @@
-const {fetchMyIP} = require('./iss');
-const {fetchCoordsByIP} = require('./iss');
-// const request = require('request');
+// IMPORT ALL FUNCTION TO BE EXECUTED in A SEQUENCE
 
-const ipp = fetchMyIP((error, ip) => {
+const {fetchMyIP} = require('./iss'); //fetch my IP
+const {fetchCoordsByIP} = require('./iss'); //fetch my Coordinates
+const {fetchISSFLyOverTimes} = require('./iss'); //Nr of times space station passess
+
+
+
+// SUPERIOR FUNCTION THAT WILL CALL OTHER ABOVE FUNCTION IN ORDER
+const {nextISSTimesForMyLocation} = require('./iss');
+
+
+
+//PRINT THE REQUEST TIME IN MILLISECONDS
+const printPassTimes = function(passTimes) {
+  for (const pass of passTimes) { // array of 5 passes
+    const datetime = new Date(0); //create date object
+    datetime.setUTCSeconds(pass.risetime);
+    const duration = pass.duration;
+    console.log(`Next pass at ${datetime} for ${duration} seconds!`);
+  }
+};
+
+
+
+// MAIN FETCHER OF INFO. It will evoke 3 functions in sequence by passing return value of each function to next one( returns JSON WITH ARRAY OF RESPONSE WITH 5 ELEMENTS)
+nextISSTimesForMyLocation((error, passTimes) => {
   if (error) {
-    console.log(`It did not work because of: ${error}`);
-    return;
+    return console.log(`It did't work, because of: ${error}`);
   }
 
-  console.log(`It worked! Returned IP: ${ip}`, typeof ip);
-  return ip;
+  // in case of no error
+  printPassTimes(passTimes);
 });
 
-console.log(ipp);
-const urlCoor = `https://ipvigilante.com/${ipp}`;
-request('https://ipvigilante.com/23.17.66.18', (err, response, body)=> {
-  console.log('sth');
-  console.log(JSON.parse(body));
-});
+
 
 
